@@ -1,4 +1,4 @@
-import DS from 'ember-data';
+// import DS from 'ember-data';
 import Ember from 'ember';
 import {
   moduleForComponent,
@@ -7,9 +7,9 @@ import {
 
 moduleForComponent('filter-content', {});
 
-var typeEmberDSObj = DS.Model.extend({});
-var typeEmberArr = Ember.ArrayProxy.create({ content: Ember.A([]) });
-var typeEmberObj = Ember.Object.create({});
+// var typeEmberDSObj = DS.Model.extend({});
+// var typeEmberArr = Ember.ArrayProxy.create({ content: Ember.A([]) });
+// var typeEmberObj = Ember.Object.create({});
 
 // initial state
 // ---------------------
