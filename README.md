@@ -35,12 +35,12 @@ ember install ember-cli-filter-component
 - Computed result of filtering items from `content` against `query`
 
 **inputClassNames** `{string}`
-- Class names appended to the filter text input
+- Class names appended to the `<input>`
   - Space-delimited
-  - **ex:** `inputClassNames"all-caps monospaced"`
+  - **ex:** `inputClassNames="all-caps monospaced"`
 
 **placeholder** `{string}`
-- Placeholder for the filter text input
+- Placeholder for the `<input>`
   - **ex:** `placeholder="Type here to filter..."`
 
 **properties (req.)** `{string}`
@@ -51,14 +51,14 @@ ember install ember-cli-filter-component
 
 **query** `{string}`
 - Value used to match against items from `content`
-  - Set using the filter text input
+  - Set using the `<input>`
 
 **showInput** `{boolean}`
-- Whether to show the filter text input
+- Whether to show the `<input>`
 
 ## Contributing / Modifying
 
-Clone the project and do what you want with it. If you're feeling generous submit a PR [against the `feature` branch (GitHub)](https://github.com/zakmac/ember-cli-filter-component/tree/feature)**.**
+Clone the project and do what you want with it. If you do something neat and are feeling generous submit a PR [against the `feature` branch (GitHub)](https://github.com/zakmac/ember-cli-filter-component/tree/feature)**.**
 
 ```shell
 cd /path/to/projects

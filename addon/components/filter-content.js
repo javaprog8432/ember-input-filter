@@ -142,7 +142,7 @@ export default Ember.Component.extend({
         // todo: check on simplifying this
         return content && content.get ? content : Ember.ArrayProxy.create({content: content});
 
-      // todo: check on plausibility of removing this
+      // @todo check on repercussions of removing this
       } else if (type === 'object') {
 
         // coerce objects into Ember.Objects
@@ -152,8 +152,8 @@ export default Ember.Component.extend({
       // - if content is an instance that is not an ember.object, take offense
       } else if (type === 'class') {
 
-        // @todo: isDS does not currently exist, luckily this path has never
-        // been executed, yet...
+        // @todo isDS does not currently exist, luckily this path has never been
+        // executed, yet...
         if (this.isDS(content)) {
 
           return content;
