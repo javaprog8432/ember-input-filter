@@ -4,121 +4,92 @@ import Ember from 'ember';
  * FilterContentComponent
  *
  * @description component that applys a simple filter to a specified content model
- *   based on basic matching
- * @memberof App
- * @extends external:Ember.Component
- * @constructor
+ *              based on basic matching
+ * @extends     external:ember.component
  */
 export default Ember.Component.extend({
 
-  /* properties
-  ------------------------ */
+  // properties
 
   /**
-   * classNames
-   *
+   * @name        classNames
    * @description class names applied to the component DOM object
-   * @memberof FilterContentComponent
-   * @type {array.<string>}
-   * @instance
+   * @type        {array.<string>}
    */
   classNames: ['filter-content'],
 
   /**
-   * component
-   *
-   * @description a reference to the component to match deprecation with yield
-   *   being passed `controller` or `view`
-   * @memberof FilterContentComponent
-   * @type {Ember.Component}
-   * @instance
+   * @name        component
+   * @deprecated  since v2.1.0
+   * @description reference to `this`, passed to template context
+   * @type        {ember.component}
    */
   component: Ember.computed(function() {
 
-    return this;
+    return ( this.get('deprecations') ? this : null );
   }),
 
   /**
-   * content
-   *
+   * @name        content
    * @description the content passed in to be filtered
-   * @memberof FilterContentComponent
-   * @type {(array|object|Ember.Object|Ember.Enumerable|DS.Model)}
-   * @instance
+   * @type        {(array|ds.model|object)}
    */
   content: [],
 
   /**
-   * filteredContent
-   *
+   * @name        deprecations
+   * @description whether to enable deprecation support
+   * @type        {(boolean|string)}
+   */
+  deprecations: false,
+
+  /**
+   * @name        filteredContent
    * @description set by applyFilter, the name says it all
-   * @memberof FilterContentComponent
-   * @type {array}
-   * @instance
+   * @type        {array}
    */
   filteredContent: [],
 
   /**
-   * inputClassNames
-   *
+   * @name        inputClassNames
    * @description space-delimited class names to append to the text query input field
-   * @memberof FilterContentComponent
-   * @type {string}
-   * @instance
+   * @type        {string}
    */
   inputClassNames: '',
 
   /**
-   * placeholder
-   *
+   * @name        placeholder
    * @description placeholder text for the text input field
-   * @memberof FilterContentComponent
-   * @type {string}
-   * @instance
+   * @type        {string}
    */
   placeholder: '',
 
   /**
-   * properties
-   *
-   * @description a space-delimited string of dot-notated properties to match
-   *   against when filtering
-   * @memberof FilterContentComponent
-   * @type {string}
-   * @instance
+   * @name        properties
+   * @description a space-delimited string of dot-notated properties to match against
+   *              when filtering
+   * @type        {string}
    */
   properties: '',
 
   /**
-   * query
-   *
+   * @name        query
    * @description the query string being filtered against
-   * @memberof FilterContentComponent
-   * @type {string}
-   * @instance
+   * @type        {string}
    */
   query: '',
 
   /**
-   * showInput
-   *
+   * @name        showInput
    * @description whether to show the query input field
-   * @memberof FilterContentComponent
-   * @type {string}
-   * @instance
+   * @type        {string}
    */
   showInput: true,
 
-  /* computed properties
-  ------------------------ */
-
   /**
-   * contentComputed
-   *
+   * @name        contentComputed
    * @description an object of known type that we can safely, naively filter
-   * @memberof FilterContentComponent
-   * @type {(Ember.ArrayProxy|Ember.Object|Ember.Enumerable|DS.Model)}
-   * @instance
+   * @type        {(ds.model|ember.arrayproxy|ember.enumerable)}
    */
   contentComputed: Ember.computed('content', function() {
 
@@ -190,12 +161,9 @@ export default Ember.Component.extend({
   }),
 
   /**
-   * inputClassNamesComputed
-   *
+   * @name        inputClassNamesComputed
    * @description concatenates any passed `inputClassNames` string with 'filter-input'
-   * @memberof FilterContentComponent
-   * @type {string}
-   * @instance
+   * @type        {string}
    */
   inputClassNamesComputed: Ember.computed('inputClassNames', function() {
 
@@ -205,13 +173,10 @@ export default Ember.Component.extend({
   }),
 
   /**
-   * propertiesComputed
-   *
+   * @name        propertiesComputed
    * @description an array of strings representing the contentComp properties
-   *   matching against
-   * @memberof FilterContentComponent
-   * @returns {array}
-   * @instance
+   *              matching against
+   * @returns     {array}
    */
   propertiesComputed: Ember.computed('properties', function() {
 
@@ -236,14 +201,11 @@ export default Ember.Component.extend({
   }),
 
   /**
-   * queryComputed
-   *
-   * @description the string being matched against 'contentComputed' replaces
-   *   forward slashes to prevent error
-   * @todo is there a better solution for forward slashes?
-   * @memberof FilterContentComponent
-   * @returns {string}
-   * @instance
+   * @name        queryComputed
+   * @todo        is there a better solution for forward slashes?
+   * @description the string being matched against 'contentComputed' replaces forward
+   *              slashes to prevent error
+   * @returns     {string}
    */
   queryComputed: Ember.computed('query', function() {
 
@@ -260,27 +222,20 @@ export default Ember.Component.extend({
     }
   }),
 
-  /* observers
-  ------------------------ */
+  // observers
 
   /**
-   * debounceFilter
-   *
+   * @name        debounceFilter
    * @description an `Ember.run.later` timer that handles debouncing `applyFilter()`,
-   *   set by `setFilterTimer()`
-   * @memberof FilterContentComponent
-   * @type {string}
-   * @instance
+   *              set by `setFilterTimer()`
+   * @type        {string}
    */
   debounceFilter: null,
 
   /**
-   * setFilterTimer
-   *
+   * @name        setFilterTimer
    * @description an observer that sets `debounceFilter` to an `Ember.run.later`
-   *   instance
-   * @memberof FilterContentComponent
-   * @instance
+   *              instance
    */
   setFilterTimer: Ember.observer('contentComputed', 'queryComputed', function() {
 
@@ -288,28 +243,25 @@ export default Ember.Component.extend({
     this.set('debounceFilter', Ember.run.later(this, this.applyFilter, 350));
   }),
 
-  /* methods
-  ------------------------ */
+  // methods
 
   /**
-   * applyFilter
-   *
-   * @description a debounced method called by `debounceFilter()` to actually apply
-   *   the filter
-   * @memberof FilterContentComponent
-   * @instance
+   * @name        applyFilter
+   * @description debounced method called by `debounceFilter()` to actually apply
+   *              the filter
    */
   applyFilter: function() {
 
-    if (this.get('isDestroyed')) { return false; }
+    // hacky testing fix, this should probably go away
+    if (this.get('isDestroyed')) { return null; }
 
-    var compareItems = [];
     var component = this;
+    var compareItems = [];
     var currentItem = [];
     var filteredItems = [];
 
     // iterate each item passed in `content`
-    filteredItems = Ember.EnumerableUtils.filter(this.get('contentComputed'), function(item) {
+    filteredItems = this.get('contentComputed').filter(function(item) {
 
       compareItems = [];
 
@@ -319,7 +271,7 @@ export default Ember.Component.extend({
         currentItem = item;
 
         // if the item supports `get()`, use it
-        if (currentItem.get) {
+        if (typeof currentItem.get === 'function') {
 
           currentItem = currentItem.get(prop);
 
@@ -352,13 +304,11 @@ export default Ember.Component.extend({
   },
 
   /**
-   * arrayContainsMatch
-   *
+   * @name        arrayContainsMatch
    * @description a method to check whether an array contains a match for a query
-   * @memberof FilterContentComponent
-   * @param possibleMatches {array.<string>} an array of strings to match against
-   * @param query {string} the query used to match against `possibleMatches`
-   * @returns {boolean} whether `possibleMatches` contains a match
+   * @param       possibleMatches {array.<string>} an array of strings to match against
+   * @param       query {string} the query used to match against `possibleMatches`
+   * @returns     {boolean} whether a match was found
    */
   arrayContainsMatch: function(possibleMatches, query) {
 
@@ -377,12 +327,11 @@ export default Ember.Component.extend({
   },
 
   /**
-   * getFromEnum
-   *
+   * @name        getFromEnum
    * @description provides `get()`-like functionality for enumerables
-   * @param {array} enumerable the array of items to search for `property`
-   * @param {string} property dot notation of desired property
-   * @returns {array} properties matching specified indices
+   * @param       {array} enumerable the array of items to search for `property`
+   * @param       {string} property dot notation of desired property
+   * @returns     {array} properties matching specified indices
    */
   getFromEnum: function(enumerable, property) {
 
@@ -483,9 +432,8 @@ export default Ember.Component.extend({
   },
 
   /**
-   * init
-   *
-   * @description use init to kick off an initial filtering
+   * @name init
+   * @description choo choo
    */
   init: function() {
 
@@ -494,16 +442,14 @@ export default Ember.Component.extend({
   },
 
   /**
-   * isMatch
-   * @todo: seems like this would fail if either value was 'false', should
-   *   probably fix this if that's the case...
-   *
+   * @name        isMatch
+   * @todo        seems like this would fail if either value was 'false', should
+   *              probably fix this if that's the case...
    * @description checks if valueA and valueB match; passed values are sloppily
-   *   coerced to strings
-   * @memberof FilterContentComponent
-   * @param {(number|string)} valueA
-   * @param {(number|string)} valueA
-   * @returns {boolean} whether there was a match between the passed values
+   *              coerced to strings
+   * @param       {(number|string)} valueA
+   * @param       {(number|string)} valueA
+   * @returns     {boolean} whether there was a match between the passed values
    */
   isMatch: function(valueA, valueB) {
 
@@ -525,10 +471,9 @@ export default Ember.Component.extend({
   },
 
   /**
-   * willDestroy
-   * @todo: this may be elligible for deprecation
-   *
-   * @description runs before the component is destroyed and tears things down
+   * @name        willDestroy
+   * @todo        this may be elligible for deprecation
+   * @description hit the brakes
    */
   willDestroy: function() {
 
