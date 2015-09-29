@@ -1,4 +1,4 @@
-{{#if showInput}}
+{{#unless hideInput}}
   {{input value=query placeholder=placeholder class=inputClassNamesComputed}}
-{{/if}}
-{{yield component}}
+{{/unless}}
+{{yield filteredContent component}}

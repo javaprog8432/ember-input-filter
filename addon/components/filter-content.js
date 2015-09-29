@@ -19,15 +19,9 @@ export default Ember.Component.extend({
   classNames: ['filter-content'],
 
   /**
-   * @name        component
-   * @deprecated  since v2.1.0
-   * @description reference to `this`, passed to template context
-   * @type        {ember.component}
+   * @deprecated  >= v2.1.0
    */
-  component: Ember.computed(function() {
-
-    return ( this.get('deprecations') ? this : null );
-  }),
+  component: Ember.computed(function() { return this; }),
 
   /**
    * @name        content
@@ -58,15 +52,20 @@ export default Ember.Component.extend({
   inputClassNames: '',
 
   /**
-   * @name        placeholder
+   * @name        inputPlaceholder
    * @description placeholder text for the text input field
    * @type        {string}
    */
-  placeholder: '',
+  inputPlaceholder: '',
+
+  /**
+   * @deprecated  >= v2.1.0
+   */
+  placeholder: Ember.computed.alias('inputPlaceholder'),
 
   /**
    * @name        properties
-   * @description a space-delimited string of dot-notated properties to match against
+   * @description space-delimited string of dot notated properties to match against
    *              when filtering
    * @type        {string}
    */
@@ -84,14 +83,19 @@ export default Ember.Component.extend({
    * @description whether to show the query input field
    * @type        {string}
    */
-  showInput: true,
+  hideInput: false,
+
+  // normalized content
+  normalContent: Ember.computed('content.@each', function(z) { console.log(`normal content\n//////////\n${z}\n//////////`); }),
 
   /**
    * @name        contentComputed
    * @description an object of known type that we can safely, naively filter
    * @type        {(ds.model|ember.arrayproxy|ember.enumerable)}
    */
-  contentComputed: Ember.computed('content', function() {
+  contentComputed: Ember.computed('content.@each', function() {
+
+    console.log('contentComputed');
 
     var content = !Ember.isNone(this.get('content')) ? this.get('content') : [];
     var type = Ember.typeOf(content);
@@ -167,18 +171,22 @@ export default Ember.Component.extend({
    */
   inputClassNamesComputed: Ember.computed('inputClassNames', function() {
 
-    var classNames = this.get('inputClassNames');
+    console.log('inputClassNamesComputed');
 
-    return (classNames ? classNames + ' ' : '') + 'filter-input';
+    var classes = this.get('inputClassNames');
+
+    return `${classes} filter-input`;
   }),
 
   /**
    * @name        propertiesComputed
-   * @description an array of strings representing the contentComp properties
-   *              matching against
+   * @description array of strings representing the contentComp properties
+   *              matching against `query`
    * @returns     {array}
    */
   propertiesComputed: Ember.computed('properties', function() {
+
+    console.log('propertiesComputed');
 
     var properties = this.get('properties') || '';
     // anything ![alphanumeric, underscore, period, space, atsymbol]
@@ -209,6 +217,8 @@ export default Ember.Component.extend({
    */
   queryComputed: Ember.computed('query', function() {
 
+    console.log('queryComputed', '============================', Date.now());
+
     var query = this.get('query');
     var regex = new RegExp(/\\+/g);
 
@@ -233,11 +243,20 @@ export default Ember.Component.extend({
   debounceFilter: null,
 
   /**
+   * @deprecated >= v2.1.0
+   */
+  showInput: Ember.computed.alias('hideInput'),
+
+  // observers
+
+  /**
    * @name        setFilterTimer
    * @description an observer that sets `debounceFilter` to an `Ember.run.later`
    *              instance
    */
   setFilterTimer: Ember.observer('contentComputed', 'queryComputed', function() {
+
+    console.log('setFilterTimer');
 
     Ember.run.cancel(this.get('debounceFilter'));
     this.set('debounceFilter', Ember.run.later(this, this.applyFilter, 350));
@@ -251,6 +270,8 @@ export default Ember.Component.extend({
    *              the filter
    */
   applyFilter: function() {
+
+    console.log('applyFilter');
 
     // hacky testing fix, this should probably go away
     if (this.get('isDestroyed')) { return null; }
@@ -300,6 +321,8 @@ export default Ember.Component.extend({
       }
     });
 
+    console.log('applyFilter', filteredItems, '============================', Date.now());
+
     this.set('filteredContent', filteredItems);
   },
 
@@ -311,6 +334,8 @@ export default Ember.Component.extend({
    * @returns     {boolean} whether a match was found
    */
   arrayContainsMatch: function(possibleMatches, query) {
+
+    console.log('arrayContainsMatch');
 
     var component = this;
     var matchFound = false;
@@ -334,6 +359,8 @@ export default Ember.Component.extend({
    * @returns     {array} properties matching specified indices
    */
   getFromEnum: function(enumerable, property) {
+
+    console.log('getFromEnum');
 
     var component = this;
     var found = [];
@@ -453,6 +480,8 @@ export default Ember.Component.extend({
    */
   isMatch: function(valueA, valueB) {
 
+    console.log('isMatch');
+
     var matched = false;
     var typeA = Ember.typeOf(valueA);
     var typeB = Ember.typeOf(valueB);
@@ -476,6 +505,8 @@ export default Ember.Component.extend({
    * @description hit the brakes
    */
   willDestroy: function() {
+
+    console.log('willDestroy');
 
     this._super();
     this.set('debounceFilter', null);
