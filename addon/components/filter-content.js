@@ -16,7 +16,7 @@ export default Ember.Component.extend({
    * @description class names applied to the component DOM object
    * @type        {array.<string>}
    */
-  classNames: ['filter-content'],
+  classNames: [ 'filter-content' ],
 
   /**
    * @deprecated  >= v2.1.0
@@ -43,6 +43,13 @@ export default Ember.Component.extend({
    * @type        {array}
    */
   filteredContent: [],
+
+  /**
+   * @name        showInput
+   * @description whether to show the query input field
+   * @type        {string}
+   */
+  hideInput: false,
 
   /**
    * @name        inputClassNames
@@ -77,16 +84,6 @@ export default Ember.Component.extend({
    * @type        {string}
    */
   query: '',
-
-  /**
-   * @name        showInput
-   * @description whether to show the query input field
-   * @type        {string}
-   */
-  hideInput: false,
-
-  // normalized content
-  normalContent: Ember.computed('content.@each', function(z) { console.log(`normal content\n//////////\n${z}\n//////////`); }),
 
   /**
    * @name        contentComputed
@@ -153,7 +150,7 @@ export default Ember.Component.extend({
 
       } else {
 
-        throw 'Ember.typeOf(content) === "'+ type +'" is not supported';
+        throw `Ember.typeOf(content) === "${type}" is not supported`;
       }
 
       return [];
@@ -186,21 +183,13 @@ export default Ember.Component.extend({
    */
   propertiesComputed: Ember.computed('properties', function() {
 
-    console.log('propertiesComputed');
-
     var properties = this.get('properties') || '';
-    // anything ![alphanumeric, underscore, period, space, atsymbol]
-    var regexA = new RegExp(/[^\w\s@.-]+/g);
-    // one or more space
-    var regexB = new RegExp(/\s+/g);
+    // var propertiesComputed = [];
 
-    // cast to string and apply transforms
     if (properties) {
 
-      return  properties
-                .toString()
-                .replace(regexA, '')
-                .split(regexB);
+      // cast to string, replace non-conformative characters, and split on whitespace
+      return properties.toString().replace(RegExp(/(?![\s\w\.\@\-\_]+).*/gi), '').split(RegExp(/\s+/g));
 
     } else {
 
@@ -216,8 +205,6 @@ export default Ember.Component.extend({
    * @returns     {string}
    */
   queryComputed: Ember.computed('query', function() {
-
-    console.log('queryComputed', '============================', Date.now());
 
     var query = this.get('query');
     var regex = new RegExp(/\\+/g);
@@ -256,74 +243,66 @@ export default Ember.Component.extend({
    */
   setFilterTimer: Ember.observer('contentComputed', 'queryComputed', function() {
 
-    console.log('setFilterTimer');
-
-    Ember.run.cancel(this.get('debounceFilter'));
-    this.set('debounceFilter', Ember.run.later(this, this.applyFilter, 350));
+    Ember.run.cancel( this.get('debounceFilter') );
+    this.set('debounceFilter', Ember.run.later( this, this.applyFilter, 350 ));
   }),
 
   // methods
 
-  /**
-   * @name        applyFilter
-   * @description debounced method called by `debounceFilter()` to actually apply
-   *              the filter
-   */
+  filterParamsChanged: Ember.observer('content', 'properties', 'query', function() {
+
+    Ember.run.debounce(this, this.applyFilter, 350);
+  }),
+
   applyFilter: function() {
 
-    console.log('applyFilter');
+    var content = this.get('contentComputed');
+    var filteredContent = [];
+    var properties = this.get('propertiesComputed');
+    var query = this.get('queryComputed');
+    var self = this;
 
-    // hacky testing fix, this should probably go away
-    if (this.get('isDestroyed')) { return null; }
+    if (content && properties && query) {
 
-    var component = this;
-    var compareItems = [];
-    var currentItem = [];
-    var filteredItems = [];
+      return Ember.RSVP.resolve().then(function() {
 
-    // iterate each item passed in `content`
-    filteredItems = this.get('contentComputed').filter(function(item) {
+        filteredContent = content.filter(function(item) {
 
-      compareItems = [];
+          return self.checkItemForMatch(item, properties, query);
+        });
 
-      // check each specified property for a match
-      component.get('propertiesComputed').forEach(function(prop) {
-
-        currentItem = item;
-
-        // if the item supports `get()`, use it
-        if (typeof currentItem.get === 'function') {
-
-          currentItem = currentItem.get(prop);
-
-        // if the item doesn't support `get()`, take the hard way
-        } else {
-
-          currentItem = component.getFromEnum(Ember.makeArray(currentItem), prop);
-        }
-
-        // if an item was found add it to the matching queue
-        if (currentItem) {
-
-          compareItems = compareItems.concat(currentItem);
-        }
+        self.set('filteredContent', filteredContent);
       });
 
-      // return true if the specified indices were found and of those, at least
-      // one matched the query
-      if (!Ember.isEmpty(compareItems)) {
+    } else {
 
-        return component.arrayContainsMatch(compareItems, component.get('queryComputed'));
+      this.set('filteredContent', content);
+    }
+  },
 
-      } else {
+  checkItemForMatch: function(item, properties, match) {
 
-        return false;
+    var queue = [];
+    var self = this;
+    var tempItem = item;
+
+    properties.forEach(function(prop) {
+
+      tempItem = item;
+
+      if (tempItem && typeof tempItem.get === 'function') {
+
+        tempItem = tempItem.get(prop);
+
+      } else if (tempItem) {
+
+        tempItem = self.getFromEnum(Ember.makeArray(tempItem), prop);
       }
+
+      if (tempItem) { queue = queue.concat(tempItem); }
     });
 
-    console.log('applyFilter', filteredItems, '============================', Date.now());
-
-    this.set('filteredContent', filteredItems);
+    return (queue.length ? this.arrayContainsMatch(queue, match) : false);
   },
 
   /**
@@ -335,14 +314,12 @@ export default Ember.Component.extend({
    */
   arrayContainsMatch: function(possibleMatches, query) {
 
-    console.log('arrayContainsMatch');
-
-    var component = this;
+    // var self = this;
     var matchFound = false;
 
     possibleMatches.forEach(function(item) {
 
-      if (!matchFound && component.isMatch(item, query)) {
+      if (!matchFound && (item.toString() === query)) {
 
         matchFound = true;
       }
@@ -360,9 +337,7 @@ export default Ember.Component.extend({
    */
   getFromEnum: function(enumerable, property) {
 
-    console.log('getFromEnum');
-
-    var component = this;
+    var self = this;
     var found = [];
     var len = 0;
     var properties = property.split('.') || [];
@@ -412,7 +387,7 @@ export default Ember.Component.extend({
                 // recurse and continue looking for value(s)
                 tempItem = Ember.makeArray(tempItem);
                 tempProperties = tempProperties.slice(y + 1, len).join('.');
-                tempItem = component.getFromEnum(tempItem, tempProperties);
+                tempItem = self.getFromEnum(tempItem, tempProperties);
 
               } else {
 
@@ -480,8 +455,6 @@ export default Ember.Component.extend({
    */
   isMatch: function(valueA, valueB) {
 
-    console.log('isMatch');
-
     var matched = false;
     var typeA = Ember.typeOf(valueA);
     var typeB = Ember.typeOf(valueB);
@@ -505,8 +478,6 @@ export default Ember.Component.extend({
    * @description hit the brakes
    */
   willDestroy: function() {
-
-    console.log('willDestroy');
 
     this._super();
     this.set('debounceFilter', null);
