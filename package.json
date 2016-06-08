@@ -1,7 +1,7 @@
 {
-  "name": "ember-cli-filter-component",
-  "version": "2.0.1",
-  "description": "An Ember.js component used to filter content based on user input.",
+  "name": "ember-input-filter",
+  "version": "0.1",
+  "description": "This is built from an already existing addon. I have made a few changes/updates.",
   "directories": {
     "doc": "doc",
     "test": "tests"
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/zakmac/ember-cli-filter-component"
+    "url": "https://github.com/javaprog8432/ember-input-filter"
   },
   "engines": {
     "node": ">= 0.10.0"
