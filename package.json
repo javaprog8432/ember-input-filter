@@ -1,6 +1,6 @@
 {
   "name": "ember-input-filter",
-  "version": "2.1",
+  "version": "2.1.0",
   "description": "This is built from an already existing addon. I have made a few changes/updates.",
   "directories": {
     "doc": "doc",
